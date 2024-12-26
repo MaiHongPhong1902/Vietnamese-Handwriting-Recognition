@@ -106,5 +106,4 @@ Special thanks to PhD. Nguyễn Ngô Lâm and Ho Chi Minh City University of Tec
 ## Contact
 - **Author**: Mai Hồng Phong
 - **Student Code**: 20119192
-- **Email**: [Insert Email Address]
-- **Class**: 241SEPR415964E_02FIE
+- **Email**: maihongphong.study@gmail.com
