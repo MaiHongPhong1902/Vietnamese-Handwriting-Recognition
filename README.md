@@ -13,6 +13,7 @@ This project explores a robust approach to Vietnamese handwriting recognition us
 ---
 
 ## Project Components
+
 ### Theoretical Foundations
 1. **CNN**: Extracts spatial features (e.g., edges, textures).
 2. **RNN**: Captures sequential dependencies in character data.
@@ -28,6 +29,86 @@ This project explores a robust approach to Vietnamese handwriting recognition us
 
 ---
 
+## Core Module
+
+```python
+from tensorflow.keras import layers
+from tensorflow.keras import Model
+from tensorflow.keras import backend as tf_keras_backend
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, MaxPool2D , Flatten
+
+tf_keras_backend.set_image_data_format('channels_last')
+tf_keras_backend.image_data_format()
+from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPool2D, LSTM, Bidirectional, Dense, Input, Reshape, Dropout, Concatenate
+from tensorflow.keras.models import Model
+import tensorflow.keras.backend as K
+from keras.layers import SpatialDropout2D
+
+def Model1():
+    inputs = Input(shape=(32, 128, 1))  
+
+    # First CNN layer
+    conv_1 = Conv2D(128, (5, 5), activation='relu', padding='same')(inputs)  
+    batch_norm_1 = BatchNormalization()(conv_1)
+    pool_1 = MaxPool2D(pool_size=(2, 2), strides=2)(batch_norm_1)
+    dropout_1 = SpatialDropout2D(0.2)(pool_1)  
+
+    # Second CNN layer
+    conv_2a = Conv2D(256, (3, 3), activation='relu', padding='same')(dropout_1)  
+    conv_2b = Conv2D(256, (5, 5), activation='relu', padding='same')(dropout_1)  
+    concat_2 = Concatenate()([conv_2a, conv_2b])
+    batch_norm_2 = BatchNormalization()(concat_2)
+    pool_2 = MaxPool2D(pool_size=(2, 2), strides=2)(batch_norm_2)
+    dropout_2 = SpatialDropout2D(0.2)(pool_2)  
+
+    # Third and fourth CNN layers
+    conv_3a = Conv2D(512, (3, 3), activation='relu', padding='same')(dropout_2) 
+    conv_3b = Conv2D(512, (5, 5), activation='relu', padding='same')(dropout_2)  
+    concat_3 = Concatenate()([conv_3a, conv_3b])
+    batch_norm_3 = BatchNormalization()(concat_3)
+
+    conv_4 = Conv2D(512, (3, 3), activation='relu', padding='same')(batch_norm_3)
+    batch_norm_4 = BatchNormalization()(conv_4)
+    pool_4 = MaxPool2D(pool_size=(2, 1))(batch_norm_4)
+    dropout_4 = SpatialDropout2D(0.2)(pool_4)  
+
+    # Fifth and sixth CNN layers
+    conv_5a = Conv2D(1024, (3, 3), activation='relu', padding='same')(dropout_4)  
+    conv_5b = Conv2D(1024, (5, 5), activation='relu', padding='same')(dropout_4)  
+    concat_5 = Concatenate()([conv_5a, conv_5b])
+    batch_norm_5 = BatchNormalization()(concat_5)
+
+    conv_6 = Conv2D(1024, (3, 3), activation='relu', padding='same')(batch_norm_5)
+    batch_norm_6 = BatchNormalization()(conv_6)
+    pool_6 = MaxPool2D(pool_size=(2, 1))(batch_norm_6)
+    dropout_6 = SpatialDropout2D(0.3)(pool_6)  
+
+    # Final CNN layer
+    conv_7 = Conv2D(2048, (2, 2), activation='relu')(dropout_6)  
+    batch_norm_7 = BatchNormalization()(conv_7)
+
+    # Reshape CNN output
+    reshaped = Reshape((31, 2048))(batch_norm_7)  
+
+    # LSTM layers
+    blstm_1 = Bidirectional(LSTM(512, return_sequences=True, dropout=0.2))(reshaped)  
+    blstm_2 = Bidirectional(LSTM(512, return_sequences=True, dropout=0.3))(blstm_1)  
+    blstm_3 = Bidirectional(LSTM(512, return_sequences=True, dropout=0.4))(blstm_2)  
+
+    # Dense layer
+    dense = Dense(1024, activation='relu')(blstm_3)  
+    batch_norm_dense = BatchNormalization()(dense)
+    dense_dropout = Dropout(0.4)(batch_norm_dense)  
+    outputs = Dense(len(char_list) + 1, activation='softmax')(dense_dropout)
+
+    act_model = Model(inputs, outputs)
+    
+    return act_model, outputs, inputs
+```
+
+---
+
 ## Results and Model Performance
 
 ### Training and Validation Metrics
@@ -39,40 +120,8 @@ The above chart demonstrates:
 
 ---
 
-### Input Image
-![Input Image](https://github.com/user-attachments/assets/43f1f6be-d0a7-483e-9c97-e8531a3a815c)
-
-This image serves as the test input for evaluating the model's performance on real-world handwriting.
-
----
-
-### Bounding Box
-![Bounding Box](https://github.com/user-attachments/assets/6af93863-af43-4f8c-bc40-ed5890e7db42)
-
-Bounding boxes are drawn around individual words, aiding the model in segmenting and recognizing text effectively.
-
----
-
-### Output Results
-#### Row 1
-![Row 1](https://github.com/user-attachments/assets/64ed3dd8-04a9-4a22-a5df-163b38f0e056)
-**Predicted Text**: Đây là hình ảnh để test mô hình
-
-#### Row 2
-![Row 2](https://github.com/user-attachments/assets/ef4d5bfc-0593-4c65-ba00-9037d7c73717)
-**Predicted Text**: Nhằm kiểm tra độ chính xác của
-
-#### Row 3
-![Row 3](https://github.com/user-attachments/assets/090dcb43-6294-4331-908c-1a74ce4f2121)
-**Predicted Text**: mô hình đã Train
-
-#### Row 4
-![Row 4](https://github.com/user-attachments/assets/aaf2fdfc-b143-4dcb-aa2f-a10afb5aebbf)
-**Predicted Text**: Train by Mai Hồng Phong
-
----
-
 ## How to Use
+
 1. **Setup Environment**:
    - Install dependencies (TensorFlow, Keras, OpenCV, etc.).
    - Prepare datasets (machine-generated and handwritten text samples).
